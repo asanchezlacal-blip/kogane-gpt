@@ -1,123 +1,429 @@
+
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KOGANE GPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOGANE GPT (KO-GPT)</title>
+  <link rel="icon" href="https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --gold: #f5bd32;
+      --gold-light: #ffe18a;
+      --dark: #101014;
+      --panel: rgba(24,23,29,.94);
+      --muted: #aaa6b0;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Finger Paint', cursive !important;
+    }
+
     body {
       margin: 0;
-      padding: 24px;
-      background: #101018;
-      color: white;
-      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      color: #fff8e7;
+      background:
+        radial-gradient(ellipse at 50% -10%,rgba(245,189,50,.19),transparent 45%),
+        radial-gradient(ellipse at 100% 100%,rgba(150,40,50,.16),transparent 40%),
+        var(--dark);
+      letter-spacing: .1px;
     }
-    main {
-      max-width: 650px;
-      margin: 30px auto;
+
+    button, input { font: inherit; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 15px clamp(16px,4vw,48px);
+      border-bottom: 1px solid #f5bd323d;
+      background: #0a0a0dbd;
+      position: sticky;
+      top: 0;
+      z-index: 5;
     }
-    h1 { color: #f5c542; }
-    #chat {
-      min-height: 280px;
-      padding: 16px;
-      background: #1d1d2b;
-      border-radius: 12px;
-      white-space: pre-wrap;
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand img { width: 48px; height: 48px; object-fit: contain; border-radius: 50%; }
+    .brand-name { font-size: 17px; color: var(--gold-light); }
+    .brand-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    .status { font-size: 10px; color: #b9ffbf; white-space: nowrap; }
+    .status:before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #6cff83;
+      margin-right: 8px;
+      box-shadow: 0 0 10px #6cff83;
+    }
+
+    main { width: min(920px,calc(100% - 28px)); margin: 34px auto 28px; }
+    .hero { text-align: center; margin: 25px auto 28px; }
+
+    .hero-logo {
+      width: 112px;
+      height: 112px;
+      object-fit: contain;
+      border-radius: 50%;
+      padding: 5px;
+      border: 1px solid #f5bd3280;
+      box-shadow: 0 0 32px #f5bd3229;
+      background: #17151a;
+    }
+
+    h1 {
+      font-size: clamp(27px,5vw,43px);
+      color: var(--gold);
+      margin: 14px 0 7px;
+      text-shadow: 0 0 22px #f5bd3233;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.9;
+      margin: 0 auto;
+      max-width: 620px;
+    }
+
+    .chat-shell {
+      border: 1px solid #f5bd3252;
+      background: var(--panel);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 70px #0007;
+    }
+
+    .chat-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: #f5bd3212;
+      border-bottom: 1px solid #f5bd3233;
+      font-size: 11px;
+    }
+
+    .chat-head span:last-child { color: var(--muted); font-size: 9px; }
+
+    #messages {
+      height: min(48vh,440px);
+      min-height: 290px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 88%;
+      align-items: flex-start;
+    }
+
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      flex: 0 0 32px;
+      border-radius: 50%;
+      background: #211e22;
+      padding: 3px;
+    }
+
+    .bubble {
+      padding: 12px 14px;
+      border: 1px solid #f5bd322e;
+      border-radius: 4px 14px 14px 14px;
+      background: #211f25;
+      font-size: 11px;
+      line-height: 1.9;
       overflow-wrap: anywhere;
     }
-    form {
+
+    .user .bubble {
+      background: #f5bd321f;
+      border-color: #f5bd3252;
+      border-radius: 14px 4px 14px 14px;
+    }
+
+    .sender { color: var(--gold); font-size: 9px; margin-bottom: 5px; }
+
+    .error .bubble {
+      color: #ff9ba4;
+      border-color: #ff4d5e8c;
+      background: #64141e38;
+    }
+
+    .typing {
+      color: var(--gold-light);
+      animation: flicker 1s infinite alternate;
+    }
+
+    @keyframes flicker {
+      from { opacity: .45; }
+      to { opacity: 1; }
+    }
+
+    .composer {
       display: flex;
-      gap: 8px;
-      margin-top: 12px;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid #f5bd3233;
+      background: #0003;
     }
-    input {
-      flex: 1;
+
+    #prompt {
       min-width: 0;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #555;
+      flex: 1;
+      color: white;
+      background: #151419;
+      border: 1px solid #49414a;
+      border-radius: 11px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 11px;
     }
-    button {
-      padding: 12px 16px;
+
+    #prompt:focus { border-color: var(--gold); }
+
+    #send {
+      color: #17120a;
+      background: var(--gold);
       border: 0;
-      border-radius: 8px;
-      background: #f5c542;
-      color: #171717;
-      font-weight: bold;
+      border-radius: 11px;
+      padding: 0 18px;
       cursor: pointer;
+      font-size: 11px;
     }
-    button:disabled { opacity: 0.5; }
-    #status { color: #f5c542; }
-    .error { color: #ff8d8d; }
+
+    #send:hover { background: var(--gold-light); }
+    #send:disabled { opacity: .5; cursor: wait; }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 9px;
+      text-align: center;
+      flex-wrap: wrap;
+    }
+
+    .footer img { width: 27px; height: 27px; object-fit: contain; border-radius: 50%; }
+
+    .fineprint {
+      text-align: center;
+      color: #77717b;
+      font-size: 8px;
+      line-height: 1.8;
+      margin: 12px auto 0;
+      max-width: 700px;
+    }
+
+    @media(max-width:520px) {
+      .topbar { padding: 12px; }
+      .brand img { width: 40px; height: 40px; }
+      .brand-name { font-size: 13px; }
+      .status { font-size: 8px; }
+      #messages { padding: 14px; }
+      .message { max-width: 96%; }
+      .composer { padding: 10px; }
+      #send { padding: 0 12px; }
+    }
   </style>
 </head>
+
 <body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter" alt="Kogane icon">
+      <div>
+        <div class="brand-name">KOGANE GPT</div>
+        <div class="brand-sub">UNLICENSED GPT SYSTEM</div>
+      </div>
+    </div>
+    <div class="status">SYSTEM ONLINE</div>
+  </header>
+
   <main>
-    <h1>KOGANE GPT</h1>
-    <p>Ask me about Jujutsu Kaisen or Jujutsu Shenanigans.</p>
+    <section class="hero">
+      <img class="hero-logo" src="https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter" alt="Kogane from Jujutsu Shenanigans">
+      <h1>KOGANE GPT</h1>
+      <p>Your cursed-tech assistant. Ask a question, start a conversation, or risk a system malfunction...</p>
+    </section>
 
-    <div id="chat" aria-live="polite">KOGANE: Welcome! Ask me anything.</div>
-    <p id="status"></p>
+    <section class="chat-shell" aria-label="Kogane GPT chat">
+      <div class="chat-head">
+        <span>◈ KOGANE TERMINAL</span>
+        <span id="session">SESSION: ACTIVE</span>
+      </div>
 
-    <form id="form">
-      <input id="message" type="text"
-        placeholder="Write your message..."
-        autocomplete="off" required>
-      <button id="send" type="submit">Send</button>
-    </form>
+      <div id="messages" aria-live="polite">
+        <div class="message">
+          <img class="avatar" src="https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter" alt="">
+          <div class="bubble">
+            <div class="sender">KOGANE GPT</div>
+            Yo! I'm Kogane GPT. Send a message and let's see what happens. Just don't blame me if the system glitches...
+          </div>
+        </div>
+      </div>
+
+      <form class="composer" id="chat-form">
+        <input id="prompt" type="text" maxlength="500" placeholder="Message Kogane GPT..." autocomplete="off" aria-label="Message Kogane GPT" required>
+        <button id="send" type="submit">SEND ↗</button>
+      </form>
+    </section>
+
+    <div class="footer">
+      <img src="https://tr.rbxcdn.com/180DAY-34336e6e0ee94e3e912fd44508bf858a/420/420/Decal/Webp/noFilter" alt="Unlicensed Studios logo">
+      <span>© 2026–2027 KO-GPT · UNLICENSED STUDIOS &amp; CORP.</span>
+    </div>
+
+    <p class="fineprint">Made for the Jujutsu Shenanigans community. This demo uses scripted random replies and is not connected to a live AI model.</p>
   </main>
 
   <script>
-    const API_URL =
-      "https://super-cloud-e125.asanchezlacal.workers.dev/";
+    const KOGANE_ICON = "https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter";
 
-    const form = document.getElementById("form");
-    const input = document.getElementById("message");
-    const chat = document.getElementById("chat");
-    const status = document.getElementById("status");
+    const replies = [
+      "Yes!!!",
+      "No!!!",
+      "How dare you...",
+      "Can you repeat that, huhh????",
+      "YES!!! ABSOLUTELY!!!",
+      "NO WAY!!!",
+      "Huh???? WHAT DID YOU SAY???",
+      "PAY ME TO FIND OUT 💰",
+      "Deal!!!",
+      "No deal!!!",
+      "Interesting...",
+      "EXCUSE ME?!",
+      "You dare challenge me?!",
+      "I have no idea what you're talking about.",
+      "Can you not?",
+      "WHAT?!",
+      "Hehehe...",
+      "Stop bothering me!!!",
+      "I'm watching you...",
+      "Maybe... maybe not!",
+      "I refuse to answer that!",
+      "That's crazy!!!",
+      "Fine!!!",
+      "SYSTEM ERROR... JUST KIDDING.",
+      "You humans are so weird...",
+      "YES! YES! YES!",
+      "No comment.",
+      "Try asking me again!",
+      "Huh? Speak louder!",
+      "I shall allow it.",
+      "Absolutely not!",
+      "Can you repeat that, huhh????",
+      "What a strange human...",
+      "YOU HAVE ACTIVATED MY CURSED TECHNIQUE!!!",
+      "Uhhhh... yes?",
+      "Nope. Try again.",
+      "The answer is... YES!!!",
+      "The answer is... NO!!!",
+      "HOW DARE YOU!!!",
+      "I wasn't listening. Repeat that."
+    ];
+
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("prompt");
     const send = document.getElementById("send");
+    const session = document.getElementById("session");
 
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    function addMessage(text, who = "bot", isError = false) {
+      const row = document.createElement("div");
+      row.className = "message" +
+        (who === "user" ? " user" : "") +
+        (isError ? " error" : "");
 
-      const message = input.value.trim();
-      if (!message) return;
-
-      chat.textContent += "\n\nYOU: " + message;
-      input.value = "";
-      status.textContent = "Kogane is thinking...";
-      status.className = "";
-      send.disabled = true;
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ message })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.reply) {
-          throw new Error(
-            (data.error || "HTTP " + response.status) +
-            (data.details ? ": " + data.details : "")
-          );
-        }
-
-        chat.textContent += "\n\nKOGANE: " + data.reply;
-        status.textContent = "";
-      } catch (error) {
-        status.className = "error";
-        status.textContent = "ERROR: " + error.message;
-      } finally {
-        send.disabled = false;
-        input.focus();
+      if (who !== "user") {
+        const avatar = document.createElement("img");
+        avatar.className = "avatar";
+        avatar.src = KOGANE_ICON;
+        avatar.alt = "";
+        row.appendChild(avatar);
       }
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      if (who !== "user") {
+        const sender = document.createElement("div");
+        sender.className = "sender";
+        sender.textContent = isError ? "SYSTEM FAILURE" : "KOGANE GPT";
+        bubble.appendChild(sender);
+      }
+
+      const content = document.createElement("div");
+      content.textContent = text;
+      bubble.appendChild(content);
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+      return row;
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function sendMessage(text) {
+      text = text.trim();
+      if (!text || send.disabled) return;
+
+      addMessage(text, "user");
+      input.value = "";
+      send.disabled = true;
+      session.textContent = "SESSION: PROCESSING";
+
+      const typing = addMessage("GENERATING RESPONSE.....");
+      typing.querySelector(".bubble").classList.add("typing");
+
+      await sleep(450 + Math.random() * 850);
+      typing.remove();
+
+      const roll = Math.random();
+
+      if (roll < 0.06) {
+        addMessage("PAY ME TO FIND OUT 💰");
+      } else if (roll < 0.10) {
+        addMessage("SYSTEM GLITCH!!! ...Everything is fine.", "bot", true);
+      } else {
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        addMessage(reply);
+      }
+
+      session.textContent = "SESSION: ACTIVE";
+      send.disabled = false;
+      input.focus();
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      sendMessage(input.value);
     });
   </script>
 </body>
 </html>
-
