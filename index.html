@@ -221,9 +221,14 @@
       } else {
         addMessage("KOGANE: " + data.reply, "kogane");
       }
-    } catch (error) {
-      status.remove();
-      showWikiError();
+    } 
+} catch (error) {
+  status.remove();
+  console.error("Kogane API error:", error);
+  alert("Error al conectar con Kogane GPT: " + error.message);
+  showWikiError();
+}
+
     } finally {
       send.disabled = false;
       input.focus();
