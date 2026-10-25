@@ -1,239 +1,124 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kogane GPT</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap" rel="stylesheet">
+  <title>KOGANE GPT</title>
   <style>
-    * { box-sizing: border-box; }
-
     body {
       margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #3b3010, #100f0b 55%);
-      color: #ffe99b;
-      font-family: "Finger Paint", cursive;
-      display: flex;
-      justify-content: center;
-      padding: 24px 12px;
+      padding: 24px;
+      background: #101018;
+      color: white;
+      font-family: Arial, sans-serif;
     }
-
-    main { width: 100%; max-width: 760px; }
-
-    header { text-align: center; margin: 10px 0 24px; }
-
-    header img {
-      width: 120px;
-      height: 120px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 18px #ffc40088);
+    main {
+      max-width: 650px;
+      margin: 30px auto;
     }
-
-    h1 {
-      color: #ffd34d;
-      font-size: clamp(27px, 6vw, 44px);
-      margin: 12px 0;
-      text-shadow: 0 0 18px #ffb70066;
-    }
-
-    .subtitle { color: #d9c98e; font-size: 12px; }
-
-    .panel {
-      background: #17160ff2;
-      border: 2px solid #b99535;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 0 30px #d49c1922;
-    }
-
-    #messages {
-      height: 340px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 4px;
-    }
-
-    .message {
+    h1 { color: #f5c542; }
+    #chat {
+      min-height: 280px;
+      padding: 16px;
+      background: #1d1d2b;
+      border-radius: 12px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
-      line-height: 1.7;
-      font-size: 13px;
     }
-
-    .kogane { color: #ffe99b; }
-    .user { color: #fff; text-align: right; }
-    .status { color: #ffbd43; font-size: 12px; }
-
-    form { display: flex; gap: 8px; margin-top: 16px; }
-
+    form {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
     input {
-      min-width: 0;
       flex: 1;
-      padding: 13px;
-      color: #fff4c8;
-      background: #090907;
-      border: 1px solid #9f812c;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 12px;
-    }
-
-    button {
-      cursor: pointer;
+      min-width: 0;
       padding: 12px;
-      color: #171106;
-      background: #f4c542;
+      border-radius: 8px;
+      border: 1px solid #555;
+    }
+    button {
+      padding: 12px 16px;
       border: 0;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 12px;
+      border-radius: 8px;
+      background: #f5c542;
+      color: #171717;
+      font-weight: bold;
+      cursor: pointer;
     }
-
-    button:disabled { opacity: .5; cursor: wait; }
-
-    footer {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 10px;
-      color: #9b916b;
-    }
-
-    footer img { width: 30px; vertical-align: middle; margin-right: 6px; }
-
-    a { color: #ffda69; }
-
-    @media (max-width: 480px) {
-      .panel { padding: 12px; }
-      #messages { height: 55vh; }
-      form { flex-wrap: wrap; }
-      form input { flex-basis: 70%; }
-    }
+    button:disabled { opacity: 0.5; }
+    #status { color: #f5c542; }
+    .error { color: #ff8d8d; }
   </style>
 </head>
 <body>
-<main>
-  <header>
-    <img
-      src="https://tr.rbxcdn.com/180DAY-3ee8e71ce97858af47a77f6541564c9c/420/420/BackAccessory/Webp/noFilter"
-      alt="Kogane"
-    >
+  <main>
     <h1>KOGANE GPT</h1>
-    <div class="subtitle">JUJUTSU KNOWLEDGE • CURSED INFORMATION</div>
-  </header>
+    <p>Ask me about Jujutsu Kaisen or Jujutsu Shenanigans.</p>
 
-  <section class="panel">
-    <div id="messages" aria-live="polite">
-      <div class="message kogane">KOGANE: Welcome! Ask me about Jujutsu Kaisen or Jujutsu Shenanigans.</div>
-    </div>
+    <div id="chat" aria-live="polite">KOGANE: Welcome! Ask me anything.</div>
+    <p id="status"></p>
 
-    <form id="chat-form">
-      <input id="question" maxlength="4000"
-        placeholder="Ask Kogane something..." autocomplete="off" required>
-      <button id="send" type="submit">SEND</button>
+    <form id="form">
+      <input id="message" type="text"
+        placeholder="Write your message..."
+        autocomplete="off" required>
+      <button id="send" type="submit">Send</button>
     </form>
-  </section>
+  </main>
 
-  <footer>
-    <img src="https://tr.rbxcdn.com/180DAY-34336e6e0ee94e3e912fd44508bf858a/420/420/Decal/Webp/noFilter"
-      alt="Unlicensed Studios">
-    UNLICENSED STUDIOS
-  </footer>
-</main>
+  <script>
+    const API_URL =
+      "https://super-cloud-e125.asanchezlacal.workers.dev/";
 
-<script>
-  // Add your Cloudflare Worker URL here after creating the Worker.
-  const API_URL = "https://super-cloud-e125.asanchezlacal.workers.dev/";
+    const form = document.getElementById("form");
+    const input = document.getElementById("message");
+    const chat = document.getElementById("chat");
+    const status = document.getElementById("status");
+    const send = document.getElementById("send");
 
-  const form = document.getElementById("chat-form");
-  const input = document.getElementById("question");
-  const send = document.getElementById("send");
-  const messages = document.getElementById("messages");
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-  function addMessage(text, type) {
-    const div = document.createElement("div");
-    div.className = "message " + type;
-    div.textContent = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-    return div;
-  }
+      const message = input.value.trim();
+      if (!message) return;
 
-  function showWikiError() {
-    const div = document.createElement("div");
-    div.className = "message kogane";
-    div.append("KOGANE GPT ERROR! Information unavailable. Consult the ");
-    const link = document.createElement("a");
-    link.href = "https://jujutsu-shenanigans.fandom.com/wiki/Jujutsu_Shenanigans";
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = "Jujutsu Shenanigans Wiki";
-    div.appendChild(link);
-    div.append(".");
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-  }
+      chat.textContent += "\n\nYOU: " + message;
+      input.value = "";
+      status.textContent = "Kogane is thinking...";
+      status.className = "";
+      send.disabled = true;
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const message = input.value.trim();
-    if (!message) return;
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
 
-    addMessage("YOU: " + message, "user");
-    input.value = "";
-    send.disabled = true;
+        const data = await response.json();
 
-    if (message.toUpperCase().includes("PAY ME TO FIND OUT")) {
-      addMessage("KOGANE: PAY ME TO FIND OUT. 🪙", "kogane");
-      send.disabled = false;
-      input.focus();
-      return;
-    }
+        if (!response.ok || !data.reply) {
+          throw new Error(
+            (data.error || "HTTP " + response.status) +
+            (data.details ? ": " + data.details : "")
+          );
+        }
 
-    const status = addMessage(
-      Math.random() < 0.5
-        ? "GENERATING RESPONSE....."
-        : "KOGANE GPT ERROR!",
-      "status"
-    );
-
-    try {
-      if (API_URL.includes("PASTE_YOUR")) {
-        throw new Error("Worker not configured yet");
+        chat.textContent += "\n\nKOGANE: " + data.reply;
+        status.textContent = "";
+      } catch (error) {
+        status.className = "error";
+        status.textContent = "ERROR: " + error.message;
+      } finally {
+        send.disabled = false;
+        input.focus();
       }
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
-
-      const data = await response.json();
-      status.remove();
-
-      if (!response.ok || !data.reply) {
-        showWikiError();
-      } else {
-        addMessage("KOGANE: " + data.reply, "kogane");
-      }
-    } 
-} catch (error) {
-  status.remove();
-  console.error("Kogane API error:", error);
-  alert("Error al conectar con Kogane GPT: " + error.message);
-  showWikiError();
-}
-
-    } finally {
-      send.disabled = false;
-      input.focus();
-    }
-  });
-</script>
+    });
+  </script>
 </body>
 </html>
+
